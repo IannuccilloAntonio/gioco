@@ -3,7 +3,7 @@ import math
 import sys
 import random
 
-screen_size = (width, height) = (900 ,500)
+screen_size = (width, height) = (1300 ,500)
 
 WHITE = (255, 255, 255)
 BLACK = ( 0, 0, 0) 
@@ -89,7 +89,7 @@ class Bomba (pygame.sprite.Sprite):
 	def update_pos(self):
 		
 		self.rect.y += speed 
-		if self.rect.y < 100:
+		if self.rect.y >500:
 			self.pos()
 		
 
@@ -109,7 +109,7 @@ torre_morta_list = pygame.sprite.Group()
 bomba_list=pygame.sprite.Group()
 
 torre= Torre("Torreepng.png",133, 204)
-torre.rect.x = 750
+torre.rect.x = 1150
 torre.rect.y = height/1.95
 
 block = Block("rect4138.png",162, 46)
@@ -120,9 +120,9 @@ arciere = Arciere("arcier.png", 140,185)
 arciere.rect.x = 0
 arciere.rect.y = (height/1.7)
 
-bomba = Bomba("bombaa.png", 78, 70)
+bomba = Bomba("capoccia.png", 85, 91)
 bomba.rect.x = 0
-bomba.rect.y = height/2 
+bomba.rect.y = height
 
 torre_morta= Torre("Torreemorta.png", 133, 204)
 
@@ -146,13 +146,18 @@ done = False
 spara = False
 score= 0
 capoccia= 50
-
+amico = 20
+capoccia2= 20
 def score(message, color):
 	text = font.render(message, True, color)
 	screen.blit(text, (1200, 460))
 
-	pygame.draw.rect(screen, (RED), (750,(height/2.3),capoccia,20))
+	pygame.draw.rect(screen, (RED), (1150,(height/2.3),capoccia,20))
+	pygame.draw.rect(screen, (RED), (arciere.rect.x,(arciere.rect.y-20),capoccia2,20))
 def win(message, color):
+	text = font2.render(message, True, color)
+	screen.blit(text, (450, 300))
+def lost(message, color):
 	text = font2.render(message, True, color)
 	screen.blit(text, (450, 300))
 
@@ -182,16 +187,28 @@ while not done :
 		        	block.reset_pos()
 		        	spara = True
 		
-	if spara == False:
+	if spara == True :
 		bomba.update_pos()
 			
 	if block.rect.x < 0: 
 		spara = False
-	
+	hit_list = pygame.sprite.spritecollide(bomba, arciere_list, False)
+    	for hit in hit_list:
+        	amico -= 1
+		print amico
 	hit_list = pygame.sprite.spritecollide(block, torre_list, False)
     	for hit in hit_list:
         	vita -= 1
-		
+		if amico <= 1000 :
+			lost("GAME OVER",RED)
+			arciere_list.update()
+        		torre_morta_list.update()
+			screen.blit(sfondo,(0,0))
+			arciere_list.draw(screen)
+			torre_morta_list.draw(screen)
+			block_list.update()
+			block_list.draw(screen)
+			score(str(vita), WHITE)
 		if vita <1478 :
 			capoccia -= 1
         		score(str(vita), WHITE)
@@ -221,7 +238,6 @@ while not done :
 		win("VITTORIA", RED)
 		block_list.update()
 		block_list.draw(screen)
-		
 		score(str(vita), WHITE)
 	
 	
