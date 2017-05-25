@@ -1,9 +1,9 @@
 import pygame
 import math
 import sys
-import random
+import random , time
 
-screen_size = (width, height) = (1300 ,500)
+screen_size = (width, height) = (900 ,500)
 
 WHITE = (255, 255, 255)
 BLACK = ( 0, 0, 0) 
@@ -109,7 +109,7 @@ torre_morta_list = pygame.sprite.Group()
 bomba_list=pygame.sprite.Group()
 
 torre= Torre("Torreepng.png",133, 204)
-torre.rect.x = 1150
+torre.rect.x = 750
 torre.rect.y = height/1.95
 
 block = Block("rect4138.png",162, 46)
@@ -142,17 +142,17 @@ font =pygame.font.SysFont(None, 60)
 font2 =pygame.font.SysFont(None, 150)
 
 vita = 50
-done = False
-spara = False
-score= 0
-capoccia= 50
-amico = 20
-capoccia2= 20
+#done = False
+#spara = False
+#capoccia= 50
+#amico = 20
+#capoccia2= 20
+gioca = True
 def score(message, color):
 	text = font.render(message, True, color)
-	screen.blit(text, (1200, 460))
+	screen.blit(text, (750, 460))
 
-	pygame.draw.rect(screen, (RED), (1150,(height/2.3),capoccia,20))
+	pygame.draw.rect(screen, (RED), (750,(height/2.3),capoccia,20))
 	pygame.draw.rect(screen, (RED), (arciere.rect.x,(arciere.rect.y-20),capoccia2,20))
 def win(message, color):
 	text = font2.render(message, True, color)
@@ -162,87 +162,94 @@ def lost(message, color):
 	screen.blit(text, (450, 300))
 
 
-	
-while not done :
-	for event in pygame.event.get():
-		if event.type==pygame.QUIT:
-			done = True
-			bomba.update_pos()
-		if event.type == pygame.KEYDOWN :
-			if event.key ==  pygame.K_UP:
-				block.aumenta()
-			if event.key ==  pygame.K_DOWN:
-				block.diminuisce()
-			if event.key == pygame.K_LEFT:
-				block.angolo_su()
-			if event.key == pygame.K_RIGHT:
-				block.angolo_giu()
-			if event.key == pygame.K_a:
-				arciere.movimento_sinistra()
-				block.update()
-			if event.key == pygame.K_d:
-				arciere.movimento_destra()
-				block.update()
-			if event.key == pygame.K_SPACE:
-		        	block.reset_pos()
-		        	spara = True
-		
-	if spara == True :
-		bomba.update_pos()
+while gioca :
+	vita = 50
+	done = False
+	spara = False
+	score= 0
+	capoccia= 50
+	amico = 20
+	capoccia2= 20
+	while not done :
+		for event in pygame.event.get():
+			if event.type==pygame.QUIT:
+				done = True
+			if event.type == pygame.KEYDOWN :
+				if event.key ==  pygame.K_UP:
+					block.aumenta()
+				if event.key ==  pygame.K_DOWN:
+					block.diminuisce()
+				if event.key == pygame.K_LEFT:
+					block.angolo_su()
+				if event.key == pygame.K_RIGHT:
+					block.angolo_giu()
+				if event.key == pygame.K_a:
+					arciere.movimento_sinistra()
+					block.update()
+				if event.key == pygame.K_d:
+					arciere.movimento_destra()
+					block.update()
+				if event.key == pygame.K_SPACE:
+						block.reset_pos()
+						spara = True
 			
-	if block.rect.x < 0: 
-		spara = False
-	hit_list = pygame.sprite.spritecollide(bomba, arciere_list, False)
-    	for hit in hit_list:
-        	amico -= 1
-		print amico
-	hit_list = pygame.sprite.spritecollide(block, torre_list, False)
-    	for hit in hit_list:
-        	vita -= 1
-		if amico <= 1000 :
-			lost("GAME OVER",RED)
+		if spara == True :
+			bomba.update_pos()
+				
+		if block.rect.x < 0: 
+			spara = False
+		hit_list = pygame.sprite.spritecollide(bomba, arciere_list, False)
+		for hit in hit_list:
+			amico -= 1
+			print amico
+			if amico < 0 :
+				screen.blit(sfondo,(0,0))
+				score(str(vita), WHITE)
+				lost("GAME OVER",RED)
+				done = True
+				gioca = False
+		hit_list = pygame.sprite.spritecollide(block, torre_list, False)
+		for hit in hit_list:
+			vita -= 1
+			
+			if vita < 1478 :
+				capoccia -= 1
+				screen.blit(sfondo,(0,0))
+        		score(str(vita), WHITE)
+		arciere_list.update()
+		torre_list.update()
+		block_list.update()
+		bomba_list.update()
+		screen.blit(sfondo,(0,0))
+		arciere_list.draw(screen)
+		block_list.draw(screen)
+		torre_list.draw(screen)
+		bomba_list.draw(screen)
+		
+		if capoccia <= 0:
 			arciere_list.update()
-        		torre_morta_list.update()
+			torre_morta_list.update()
 			screen.blit(sfondo,(0,0))
 			arciere_list.draw(screen)
 			torre_morta_list.draw(screen)
+			score(str(vita), WHITE)
+			torre_morta.rect.x =  750
+			torre_morta.rect.y = height/1.95
+			torre_morta_list.draw(screen)
+			win("VITTORIA", RED)
 			block_list.update()
 			block_list.draw(screen)
-			score(str(vita), WHITE)
-		if vita <1478 :
-			capoccia -= 1
-        		score(str(vita), WHITE)
-	#arciere.rect.x = 0
-	#arciere.rect.y = (height/1.7)
-	arciere_list.update()
-	torre_list.update()
-	block_list.update()
-	bomba_list.update()
-	screen.blit(sfondo,(0,0))
-	arciere_list.draw(screen)
-	block_list.draw(screen)
-	torre_list.draw(screen)
-	bomba_list.draw(screen)
-	score(str(vita), WHITE)
-	if capoccia <= 0:
+			score(str(capoccia), WHITE)		
 		
-		arciere_list.update()
-        	torre_morta_list.update()
-		screen.blit(sfondo,(0,0))
-		arciere_list.draw(screen)
-		torre_morta_list.draw(screen)
-		score(str(vita), WHITE)
-		torre_morta.rect.x = 1150
-		torre_morta.rect.y = height/1.95
-		torre_morta_list.draw(screen)
-		win("VITTORIA", RED)
-		block_list.update()
-		block_list.draw(screen)
-		score(str(vita), WHITE)
-	
-	
+		
+	for event in pygame.event.get():
+		if event.type == pygame.KEYDOWN :
+				if event.key ==  pygame.K_y:
+					gioca = True
+				if event.key ==  pygame.K_n:
+					gioca = False
 	pygame.display.flip()
 	clock.tick(30)
-
 print ("Hai vinto")
+time.sleep(4)
 pygame.quit()
